@@ -1,0 +1,53 @@
+import argparse
+import os
+import sys
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('filenames',nargs = '+',help="List of input data files to process")
+
+parser.add_argument('--mode',choices=['mean','sum','count'],default='count',help="The analysis mode (choose from: 'mean','sum','count')") 
+
+group = parser.add_mutually_exclusive_group()
+                    
+group.add_argument("-q","--quiet",action="store_true",help="Suppress informational messages and only print the final result.")
+
+group.add_argument("-v","--verbose",action="count",default=0,help="Increase output verbosity(-v,-vv).") 
+
+args = parser.parse_args()
+
+for filename in args.filenames:
+    if not os.path.exists(filename):
+            sys.stderr.write(f'Error: File not found: {filename}')
+            exit(1)
+
+
+
+lists = []
+for filename in args.filenames:
+    with open(f"{filename}","r") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                try:
+                    num=float(line) 
+                    lists.append(num)
+                except ValueError:
+                    continue
+if args.verbose == 1:
+    for file in args.filenames:
+        print(f'Prcocessing {file}....')
+if args.verbose >= 2:
+    print(f'Found {len(lists)} valid numbers')
+
+if not args.quiet and args.verbose ==0:
+    print("Processing complete")
+
+if args.mode == 'count':
+    print(f'{len(lists)}')
+if args.mode == 'sum' :
+    print(f'{sum(lists)}')
+if args.mode == 'mean':
+    mean=sum(lists)/len(lists)
+    print(f'{mean}')
+
